@@ -4,7 +4,6 @@ import { signIn } from "@/auth";
 import { prisma } from "@/db/prisma";
 import { LoginSchema, RegisterSchema } from "@/schema/auth";
 import { hashSync } from "bcrypt-ts";
-import { error } from "console";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 
@@ -55,12 +54,13 @@ export const signInCredentials = async (prevState: unknown, formData: FormData) 
     } catch (error) {
         if(error instanceof AuthError) {
             switch (error.message) {
-                case "CredentialSignin":
+                case "CredentialsSignin":
                     return { message: "error" }
                 default:
                     return { message: "something went wrong" }
             }
         }
+        throw error;
     }
-    throw error;
+    
 }

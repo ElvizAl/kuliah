@@ -1,9 +1,18 @@
-import NextAuth from "next-auth"
+import NextAuth, { AuthError } from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/db/prisma"
 import Crendetials from "next-auth/providers/credentials"
 import { LoginSchema } from "./schema/auth"
 import { compareSync } from "bcrypt-ts"
+import { ZodError } from "zod"
+
+export class CustomAuthError extends AuthError{
+  constructor(msg: string) {
+    super();
+    this.message = msg;
+    this.stack = undefined;
+  }
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -20,7 +29,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: {},
       },
       authorize: async (credentials) => {
-        const validatedFields = LoginSchema.safeParse(credentials);
+        try {
+          const validatedFields = LoginSchema.safeParse(credentials);
 
         if (!validatedFields.success) {
           return null;
@@ -43,6 +53,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (!passwordMatch) return null;
 
         return user;
+        } catch (error:any) {
+          if (error instanceof ZodError) throw new CustomAuthError("Invalid Credentials");
+          throw new CustomAuthError(error.message);
+        }
       }
     })  
   ],
