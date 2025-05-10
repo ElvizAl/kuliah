@@ -28,8 +28,7 @@ export const signUpCredentials = async (prevState: unknown,  formData: FormData)
                 password: hashedPassword
             }
         })
-    } catch (error: unknown) {
-    console.error(error); // Log the error
+    } catch (error) {
     return { message: "Failed to create user" }
 }
     redirect("/login");
