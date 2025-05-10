@@ -1,4 +1,4 @@
-import NextAuth, { AuthError } from "next-auth"
+import NextAuth from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/db/prisma"
 import Crendetials from "next-auth/providers/credentials"
