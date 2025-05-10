@@ -6,7 +6,7 @@ import { LoginSchema } from "./schema/auth"
 import { compareSync } from "bcrypt-ts"
 import { ZodError } from "zod"
 
-export class CustomAuthError extends AuthError{
+export class CustomAuthError extends AuthError {
   constructor(msg: string) {
     super();
     this.message = msg;
@@ -32,32 +32,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           const validatedFields = LoginSchema.safeParse(credentials);
 
-        if (!validatedFields.success) {
-          return null;
-        }
+          if (!validatedFields.success) {
+            return null;
+          }
 
-        const { email, password } = validatedFields.data;
+          const { email, password } = validatedFields.data;
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email,
-          },
-        });
+          const user = await prisma.user.findUnique({
+            where: {
+              email,
+            },
+          });
 
-        if (!user || !user.password) {
-          throw new Error("User not found");
-        }
-        
-        const passwordMatch = compareSync(password, user.password);
+          if (!user || !user.password) {
+            throw new Error("User not found");
+          }
 
-        if (!passwordMatch) return null;
+          const passwordMatch = compareSync(password, user.password);
 
-        return user;
-        } catch (error:any) {
+          if (!passwordMatch) return null;
+
+          return user;
+        } catch (error: unknown) {
           if (error instanceof ZodError) throw new CustomAuthError("Invalid Credentials");
-          throw new CustomAuthError(error.message);
+          if (error instanceof Error) throw new CustomAuthError(error.message);
+          throw new CustomAuthError("An unknown error occurred");
         }
-      }
-    })  
+      },
+    }),
   ],
 })
